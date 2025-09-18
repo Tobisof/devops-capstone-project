@@ -16,6 +16,8 @@ spec:
     - name: branch
       default: main
       description: Git branch to clone
+    - name: build-image
+      description: Container registry destination image
   tasks:
     - name: init
       workspaces:
@@ -69,3 +71,17 @@ spec:
           value: "-v --with-spec --spec-color"
       runAfter:
         - clone
+
+    - name: build
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+        - name: IMAGE
+          value: "$(params.build-image)"
+      runAfter:
+        - tests
+        - lint
